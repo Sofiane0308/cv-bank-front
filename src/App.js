@@ -127,7 +127,7 @@ class Query extends Component {
 
   state = {
     keyWords: [""],
-    result: null
+    result: []
   }
 
   addKeyWord() {
@@ -166,7 +166,7 @@ class Query extends Component {
   render() {
 
     let resultView;
-    if (this.state.result) resultView = <Card>
+    if (this.state.result.length) resultView = <Card>
       <Card.Body>
         <Card.Title>
           Matching CVs
