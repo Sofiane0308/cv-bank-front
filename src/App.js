@@ -4,7 +4,7 @@ import 'bootstrap/dist/css/bootstrap.min.css';
 import React, { Component } from 'react';
 import axios from 'axios';
 
-const backendURL = "http://db0e8b62d2fc.ngrok.io/";
+const backendURL = "http://localhost:8080/";
 
 // 2 tabs for uploading and querying
 class App extends Component {
