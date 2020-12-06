@@ -1,5 +1,5 @@
 import './App.css';
-import { Button, Card, Row, Form, Col, Tabs, Tab, Table,Alert } from 'react-bootstrap';
+import { Button, Card, Row, Form, Col, Tabs, Tab, Table, Alert } from 'react-bootstrap';
 import 'bootstrap/dist/css/bootstrap.min.css';
 import React, { Component } from 'react';
 import axios from 'axios';
@@ -32,6 +32,7 @@ class Upload extends Component {
 
   state = {
     selectedFiles: [],
+    loading: false,
     uploadSuccess: null,
   };
 
@@ -39,7 +40,7 @@ class Upload extends Component {
   onFileChange = event => {
     console.log(event.target.files);
     // Update the state 
-    this.setState({ selectedFiles: event.target.files, uploadSuccess:false });
+    this.setState({ selectedFiles: event.target.files, uploadSuccess: false });
 
   };
 
@@ -50,14 +51,14 @@ class Upload extends Component {
     const formData = new FormData();
 
     // Update the formData object
-    
+
     for (let i = 0; i < this.state.selectedFiles.length; i++) {
       formData.append(
         "files",
         this.state.selectedFiles[i],
         this.state.selectedFiles[i].name
       );
-    }    
+    }
 
 
     // Request made to the backend api 
@@ -68,25 +69,31 @@ class Upload extends Component {
         "Access-Control-Allow-Origin": "*",
       }
     }
+
+    this.setState({ loading: true});
+
     var self = this;
     axios.post(backendURL, formData, config)
-    .then(function (response) {
-      self.setState({ uploadSuccess: true });
-    })
-    .catch(function (error) {
-      console.log(error);
-    });
+      .then(function (response) {
+        self.setState({ uploadSuccess: true, loading:false });
+      })
+      .catch(function (error) {
+        console.log(error);
+        self.setState({ uploadSuccess: false, loading:false });
+      });
   };
 
   render() {
 
-    let label ;
+    let label;
     if (this.state.selectedFiles.length) { label = "CV(s) selected click on the Upload button!" } else { label = "Select CV(s) to upload" }
 
     let uploadAlert;
-    if(this.state.uploadSuccess) { uploadAlert = <Alert  variant="success">
-    CV(s) uploaded successfully !
-  </Alert> }
+    if (this.state.uploadSuccess) {
+      uploadAlert = <Alert variant="success">
+        CV(s) uploaded successfully !
+  </Alert>
+    }
 
     return <Card>
       <Card.Body>
@@ -95,17 +102,19 @@ class Upload extends Component {
           label={label}
           accept=".docx,.pdf"
           onChange={this.onFileChange}
-          multiple 
+          multiple
           custom
         />
 
         <hr />
-        <Button onClick={this.onFileUpload}>
-          Upload
+        <Button disabled={this.state.loading}
+          onClick={!this.state.loading ? this.onFileUpload : null}>
+          
+          {this.state.loading ? 'Uploading...' : 'Upload'}
         </Button>
-        <hr /> 
+        <hr />
         {uploadAlert}
-        
+
       </Card.Body>
     </Card>;
   }
@@ -143,15 +152,15 @@ class Query extends Component {
         body: this.state.keyWords.toString()
       }
     })
-    .then(function (response) {
-      self.setState({ result: response.data });
-    })
-    .catch(function (error) {
-      console.log(error);
-    });  
+      .then(function (response) {
+        self.setState({ result: response.data });
+      })
+      .catch(function (error) {
+        console.log(error);
+      });
   }
 
- 
+
 
 
   render() {
@@ -163,16 +172,16 @@ class Query extends Component {
           Matching CVs
         </Card.Title>
         <Table striped bordered hover>
-            <thead>
-              <tr>
-                <th>#</th>
-                <th>CV</th>
-              </tr>
-            </thead>
-            <tbody>
-              {this.state.result.map((article, index) => <tr><td>{index}</td>  <td> {article} </td></tr>)}
-            </tbody>
-          </Table>
+          <thead>
+            <tr>
+              <th>#</th>
+              <th>CV</th>
+            </tr>
+          </thead>
+          <tbody>
+            {this.state.result.map((article, index) => <tr><td>{index}</td>  <td> {article} </td></tr>)}
+          </tbody>
+        </Table>
       </Card.Body>
     </Card>
 
@@ -181,8 +190,8 @@ class Query extends Component {
         <Card.Title>
           Key words {'  '}
           <Button variant="success" onClick={(e) => this.addKeyWord(e)}> +  </Button>
-          </Card.Title>
-          
+        </Card.Title>
+
 
         {
           this.state.keyWords.map((keyWord, index) => {
@@ -202,8 +211,8 @@ class Query extends Component {
         }
 
         <hr />
-        
-        <Button  onClick={(e) => this.handleSubmit(e)}> Submit  </Button>
+
+        <Button onClick={(e) => this.handleSubmit(e)}> Submit  </Button>
         <hr />
         {resultView}
 
